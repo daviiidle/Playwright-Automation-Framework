@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:demowebshop.tricentis.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

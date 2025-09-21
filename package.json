@@ -1,0 +1,35 @@
+{
+  "name": "demo-webshop-automation",
+  "version": "1.0.0",
+  "description": "Playwright automation framework for Tricentis Demo Web Shop",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:parallel": "playwright test --workers=4",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:safari": "playwright test --project=webkit",
+    "test:report": "playwright show-report",
+    "errors": "npx ts-node src/utils/ErrorAnalyzer.ts",
+    "errors:latest": "npx ts-node src/utils/ErrorAnalyzer.ts latest",
+    "errors:history": "npx ts-node src/utils/ErrorAnalyzer.ts history",
+    "errors:handler": "npx ts-node src/utils/ErrorAnalyzer.ts handler",
+    "retries:off": "node toggle-retries.js off",
+    "retries:on": "node toggle-retries.js on",
+    "codegen": "playwright codegen https://demowebshop.tricentis.com/",
+    "install:browsers": "playwright install"
+  },
+  "keywords": ["playwright", "automation", "testing", "typescript", "e2e"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
+    "@faker-js/faker": "^8.3.1",
+    "typescript": "^5.0.0",
+    "dotenv": "^16.3.1"
+  }
+}

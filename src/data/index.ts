@@ -1,0 +1,2 @@
+export { UserDataFactory, type User, type LoginCredentials, type InvalidUserData } from './UserDataFactory';
+export { ProductDataFactory, type Product, type SearchQuery, type CartItem } from './ProductDataFactory';
