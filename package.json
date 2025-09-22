@@ -16,6 +16,8 @@
     "test:firefox": "playwright test --project=firefox",
     "test:safari": "playwright test --project=webkit",
     "test:report": "playwright show-report",
+    "test:ci": "playwright test --reporter=html,json,junit",
+    "test:shard": "playwright test --shard",
     "errors": "npx ts-node src/utils/ErrorAnalyzer.ts",
     "errors:latest": "npx ts-node src/utils/ErrorAnalyzer.ts latest",
     "errors:history": "npx ts-node src/utils/ErrorAnalyzer.ts history",

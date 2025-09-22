@@ -1,0 +1,132 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Split tests across multiple shards for parallel execution
+        shard: [1/4, 2/4, 3/4, 4/4]
+        project: [chromium, firefox, webkit]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps ${{ matrix.project }}
+
+    - name: Run Playwright tests
+      run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}
+      env:
+        CI: true
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-results-${{ matrix.project }}-${{ matrix.shard }}
+        path: |
+          test-results/
+          playwright-report/
+        retention-days: 30
+
+    - name: Upload test report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.project }}-${{ matrix.shard }}
+        path: playwright-report/
+        retention-days: 30
+
+  # Merge all test results and generate combined report
+  merge-reports:
+    if: always()
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: all-artifacts
+
+    - name: Merge test results
+      run: |
+        # Create merged results directory
+        mkdir -p merged-results
+
+        # Copy all test results to merged directory
+        find all-artifacts -name "*.json" -path "*/test-results/*" -exec cp {} merged-results/ \;
+        find all-artifacts -name "*.xml" -path "*/test-results/*" -exec cp {} merged-results/ \;
+
+        # Generate merged HTML report
+        npx playwright merge-reports --reporter html all-artifacts/playwright-results-*/
+
+    - name: Upload merged report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: merged-playwright-report
+        path: |
+          playwright-report/
+          merged-results/
+        retention-days: 30
+
+    - name: Comment PR with test results
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+
+          // Read test results summary
+          let summary = 'Playwright Test Results:\n\n';
+
+          try {
+            // Check for any test result files
+            const resultsDir = 'merged-results';
+            if (fs.existsSync(resultsDir)) {
+              const files = fs.readdirSync(resultsDir);
+              const jsonFiles = files.filter(f => f.endsWith('.json'));
+
+              if (jsonFiles.length > 0) {
+                summary += `✅ Tests completed across all shards and browsers\n`;
+                summary += `📊 View detailed report in the Actions artifacts\n`;
+              }
+            }
+          } catch (error) {
+            summary += `⚠️ Could not read test results: ${error.message}\n`;
+          }
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: summary
+          });

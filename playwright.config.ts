@@ -5,10 +5,10 @@ dotenv.config();
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0, // Disabled for faster feedback - was: process.env.CI ? 2 : 2,
-  workers: process.env.CI ? 1 : 1,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? '50%' : 1,
   timeout: 120000,
   expect: {
     timeout: 15000,
@@ -45,15 +45,15 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    // Temporarily disabled other browsers for stability testing
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    // Mobile browsers (uncomment if needed for your test scenarios)
     // {
     //   name: 'mobile-chrome',
     //   use: { ...devices['Pixel 5'] },
