@@ -17,6 +17,15 @@ jobs:
         # Split tests across multiple shards for parallel execution
         shard: [1/4, 2/4, 3/4, 4/4]
         project: [chromium, firefox, webkit]
+        include:
+          - shard: 1/4
+            shard_name: "1-4"
+          - shard: 2/4
+            shard_name: "2-4"
+          - shard: 3/4
+            shard_name: "3-4"
+          - shard: 4/4
+            shard_name: "4-4"
 
     steps:
     - uses: actions/checkout@v4
@@ -41,7 +50,7 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results-${{ matrix.project }}-shard-${{ replace(matrix.shard, '/', '-') }}
+        name: test-results-${{ matrix.project }}-shard-${{ matrix.shard_name }}
         path: |
           test-results/
           playwright-report/
