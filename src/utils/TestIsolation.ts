@@ -15,7 +15,7 @@ export class TestIsolation {
     const testId = this.generateTestId();
     this.activeTests.add(testId);
 
-    console.log(`🧪 Starting test: ${testName} (${testId})`);
+    console.log(`[TEST] Starting test: ${testName} (${testId})`);
 
     try {
       // Clear all browser data for clean state
@@ -27,10 +27,10 @@ export class TestIsolation {
       // Wait for page to be ready
       await page.waitForLoadState('networkidle', { timeout: 10000 });
 
-      console.log(`✅ Test setup complete: ${testName}`);
+      console.log(`[OK] Test setup complete: ${testName}`);
 
     } catch (error) {
-      console.error(`❌ Test setup failed: ${testName}`, error);
+      console.error(`[ERROR] Test setup failed: ${testName}`, error);
       await ErrorHandler.getInstance().handleError(error as Error, page, testName);
       throw error;
     }
@@ -39,7 +39,7 @@ export class TestIsolation {
   }
 
   static async afterTest(page: Page, testName: string, testId: string): Promise<void> {
-    console.log(`🧹 Cleaning up test: ${testName} (${testId})`);
+    console.log(`[CLEANUP] Cleaning up test: ${testName} (${testId})`);
 
     try {
       // Clear user session
@@ -57,10 +57,10 @@ export class TestIsolation {
       }
 
       this.activeTests.delete(testId);
-      console.log(`✅ Test cleanup complete: ${testName}`);
+      console.log(`[OK] Test cleanup complete: ${testName}`);
 
     } catch (error) {
-      console.error(`❌ Test cleanup failed: ${testName}`, error);
+      console.error(`[ERROR] Test cleanup failed: ${testName}`, error);
     }
   }
 
@@ -96,7 +96,7 @@ export class TestIsolation {
   }
 
   static async onTestFailure(page: Page, testName: string, error: Error): Promise<void> {
-    console.error(`💥 Test failure: ${testName}`);
+    console.error(`[FAIL] Test failure: ${testName}`);
 
     try {
       // Capture failure context
@@ -107,7 +107,7 @@ export class TestIsolation {
       });
 
       // Additional debug info
-      console.log('🔍 Debug info:', {
+      console.log('[DEBUG] Debug info:', {
         url: page.url(),
         title: await page.title().catch(() => 'Unable to get title'),
         activeTests: Array.from(this.activeTests)

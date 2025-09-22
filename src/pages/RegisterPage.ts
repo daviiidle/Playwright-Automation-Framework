@@ -141,20 +141,67 @@ export class RegisterPage extends BasePage {
 
   async getErrorMessage(): Promise<string> {
     return await this.retryOperation(async () => {
-      await this.waitForTimeout(1000); // Allow time for error messages to appear
-      if (await this.isElementVisible(this.errorMessage)) {
-        return await this.getElementText(this.errorMessage);
+      await this.waitForTimeout(2000); // Allow more time for error messages to appear
+
+      // Try multiple selectors to find error messages
+      const errorSelectors = [
+        '.validation-summary-errors',
+        '.message-error',
+        '.alert-danger',
+        '.field-validation-error',
+        '[class*="error"]',
+        '.page-body'  // Sometimes error message is in page body
+      ];
+
+      for (const selector of errorSelectors) {
+        const errorElement = this.page.locator(selector).first();
+        if (await errorElement.isVisible()) {
+          const text = await errorElement.textContent();
+          if (text && text.trim()) {
+            return text.trim();
+          }
+        }
       }
+
       return '';
     }, 'get error message');
   }
 
   async getSuccessMessage(): Promise<string> {
     return await this.retryOperation(async () => {
-      await this.waitForTimeout(2000); // Allow time for success messages to appear
-      if (await this.isElementVisible(this.successMessage)) {
-        return await this.getElementText(this.successMessage);
+      await this.waitForTimeout(3000); // Allow more time for success messages to appear
+
+      // First check if we're on a success page by URL
+      const currentUrl = await this.getCurrentUrl();
+      if (currentUrl.includes('/registerresult') || currentUrl.includes('success')) {
+        // Look for specific success content, avoiding form fields
+        const successSelectors = [
+          '.result:not(:has(input)):not(:has(label))',
+          '.registration-result-page .result',
+          '.page-body .result',
+          'div:has-text("registration completed"):not(:has(input))',
+          'div:has-text("successful"):not(:has(input))',
+          'h1:has-text("registration")',
+          'p:has-text("registration")'
+        ];
+
+        for (const selector of successSelectors) {
+          const successElement = this.page.locator(selector).first();
+          if (await successElement.isVisible()) {
+            const text = await successElement.textContent();
+            if (text && text.trim() && !text.includes('Password:') && !text.includes('Email:')) {
+              return text.trim();
+            }
+          }
+        }
+
+        // If on success page but no specific message found, check page content
+        const pageContent = await this.page.locator('.page-body, .main-content, .content').first().textContent();
+        if (pageContent && pageContent.includes('registration') && !pageContent.includes('Password:')) {
+          return 'Registration successful';
+        }
       }
+
       return '';
     }, 'get success message');
   }

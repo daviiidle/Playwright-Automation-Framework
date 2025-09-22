@@ -37,10 +37,16 @@ export class UserDataFactory {
     const lastName = faker.person.lastName();
     const password = this.generateValidPassword();
 
+    // Generate a highly unique email with timestamp and random string
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const baseEmail = faker.internet.email({ firstName, lastName }).toLowerCase();
+    const uniqueEmail = baseEmail.replace('@', `_${timestamp}_${randomString}@`);
+
     return {
       firstName,
       lastName,
-      email: faker.internet.email({ firstName, lastName }).toLowerCase(),
+      email: uniqueEmail,
       password,
       confirmPassword: password,
       gender: faker.helpers.arrayElement(['male', 'female']),
@@ -59,8 +65,14 @@ export class UserDataFactory {
   static createLoginCredentials(): LoginCredentials {
     this.setSeed();
 
+    // Generate unique email for login credentials
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 8);
+    const baseEmail = faker.internet.email().toLowerCase();
+    const uniqueEmail = baseEmail.replace('@', `_${timestamp}_${randomString}@`);
+
     return {
-      email: faker.internet.email().toLowerCase(),
+      email: uniqueEmail,
       password: this.generateValidPassword()
     };
   }

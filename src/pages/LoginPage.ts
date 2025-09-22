@@ -48,10 +48,7 @@ export class LoginPage extends BasePage {
       .or(page.locator('a:has-text("Sign up")'))
       .or(page.locator('a[href*="register"]'));
 
-    this.errorMessage = page.locator('div.message-error')
-      .or(page.locator('div.validation-summary-errors').first())
-      .or(page.locator('.alert-danger'))
-      .or(page.locator('[class*="error"][class*="message"]').first());
+    this.errorMessage = page.locator('.validation-summary-errors, div.message-error, .alert-danger').first();
 
     this.successMessage = page.locator('.message-success')
       .or(page.locator('.result'))
@@ -114,10 +111,27 @@ export class LoginPage extends BasePage {
 
   async getErrorMessage(): Promise<string> {
     return await this.retryOperation(async () => {
-      await this.waitForTimeout(1000); // Allow time for error messages to appear
-      if (await this.strictIsVisible(this.errorMessage)) {
-        return await this.strictGetText(this.errorMessage);
+      await this.waitForTimeout(2000); // Allow more time for error messages to appear
+
+      // Try multiple selectors to find error messages
+      const errorSelectors = [
+        '.validation-summary-errors',
+        'div.message-error',
+        '.alert-danger',
+        '.field-validation-error',
+        '[class*="error"]'
+      ];
+
+      for (const selector of errorSelectors) {
+        const errorElement = this.page.locator(selector).first();
+        if (await errorElement.isVisible()) {
+          const text = await errorElement.textContent();
+          if (text && text.trim()) {
+            return text.trim();
+          }
+        }
       }
+
       return '';
     }, 'get error message');
   }
@@ -198,16 +212,18 @@ export class LoginPage extends BasePage {
 
   async validateEmailField(email: string): Promise<string[]> {
     return await this.retryOperation(async () => {
-      await this.safeFill(this.emailInput, email);
+      await this.strictSafeFill(this.emailInput, email);
       await this.pressKey('Tab');
       await this.waitForTimeout(1000); // Allow validation to process
 
-      // Look for validation errors specific to email field
-      const emailErrorLocator = this.emailInput.locator('xpath=following-sibling::span[contains(@class, "field-validation-error")]');
-      const errors: string[] = [];
+      // Try the login to trigger server-side validation
+      await this.strictSafeClick(this.loginButton);
+      await this.waitForTimeout(1000);
 
-      if (await emailErrorLocator.isVisible()) {
-        const errorText = await emailErrorLocator.textContent();
+      // Check for general error message
+      const errors: string[] = [];
+      if (await this.strictIsVisible(this.errorMessage)) {
+        const errorText = await this.strictGetText(this.errorMessage);
         if (errorText) {
           errors.push(errorText.trim());
         }

@@ -24,7 +24,7 @@ export class ShoppingCartPage extends BasePage {
 
     this.pageTitle = page.locator('.page-title h1').or(page.locator('h1'));
     this.cartItems = page.locator('.cart-item-row').or(page.locator('[class*="cart-item"]'));
-    this.emptyCartMessage = page.locator('.no-data').or(page.locator(':has-text("Your Shopping Cart is empty!")'));
+    this.emptyCartMessage = page.locator('.order-summary-content:has-text("Your Shopping Cart is empty!")').or(page.locator('.no-data')).first();
     this.continueShoppingButton = page.locator('.continue-shopping-button').or(page.locator('button:has-text("Continue shopping")'));
     this.updateCartButton = page.locator('input[name="updatecart"]').or(page.locator('button:has-text("Update")'));
     this.checkoutButton = page.locator('#checkout').or(page.locator('button:has-text("Checkout")'));
@@ -33,8 +33,8 @@ export class ShoppingCartPage extends BasePage {
     this.applyCouponButton = page.locator('input[name="applydiscountcouponcode"]');
     this.giftCardBox = page.locator('#giftcardcouponcode');
     this.applyGiftCardButton = page.locator('input[name="applygiftcardcouponcode"]');
-    this.orderTotal = page.locator('.order-total .value-summary').or(page.locator('[class*="total"]'));
-    this.subTotal = page.locator('.order-subtotal .value-summary').or(page.locator('[class*="subtotal"]'));
+    this.orderTotal = page.locator('table.cart-total tr:last-child .cart-total-right').first();
+    this.subTotal = page.locator('.order-subtotal .value-summary').or(page.locator('[class*="subtotal"]')).first();
     this.shippingCost = page.locator('.shipping-cost .value-summary').or(page.locator('[class*="shipping"]'));
     this.tax = page.locator('.tax-value .value-summary').or(page.locator('[class*="tax"]'));
     this.termsOfServiceCheckbox = page.locator('#termsofservice').or(page.locator('input[name*="terms"]'));

@@ -114,7 +114,7 @@ class ErrorAnalyzer {
 
       if (errors[0].strictModeDetails?.foundElements?.length) {
         console.log('   Found elements:');
-        errors[0].strictModeDetails.foundElements.forEach((element, i) => {
+        errors[0].strictModeDetails.foundElements.forEach((element: string, i: number) => {
           console.log(`     ${i + 1}) ${element}`);
         });
       }

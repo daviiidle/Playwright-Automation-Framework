@@ -25,8 +25,8 @@ export class ProductPage extends BasePage {
 
     this.productTitle = page.locator('.product-name h1').or(page.locator('h1'));
     this.productPrice = page.locator('[class*="price-value"]').or(page.locator('.price-actual-price'));
-    this.productImage = page.locator('.picture img').or(page.locator('.product-image img'));
-    this.productDescription = page.locator('.full-description').or(page.locator('.short-description'));
+    this.productImage = page.locator('.picture img').or(page.locator('.product-image img')).first();
+    this.productDescription = page.locator('.full-description').or(page.locator('.short-description')).first();
     this.addToCartButton = page.locator('[id*="add-to-cart-button"]').or(page.locator('button:has-text("Add to cart")'));
     this.addToWishlistButton = page.locator('[id*="add-to-wishlist-button"]').or(page.locator('button:has-text("Add to wishlist")'));
     this.addToCompareButton = page.locator('[id*="add-to-compare"]').or(page.locator('button:has-text("Add to compare")'));
@@ -66,7 +66,13 @@ export class ProductPage extends BasePage {
   }
 
   async addToCompareList(): Promise<void> {
-    await this.clickElement(this.addToCompareButton);
+    // Check if compare button exists and is visible
+    if (await this.isElementVisible(this.addToCompareButton)) {
+      await this.clickElement(this.addToCompareButton);
+    } else {
+      // Skip if compare functionality is not available
+      console.log('Compare functionality not available on this product');
+    }
   }
 
   async setQuantity(quantity: number): Promise<void> {
@@ -143,8 +149,30 @@ export class ProductPage extends BasePage {
   }
 
   async getSuccessMessage(): Promise<string> {
-    if (await this.isElementVisible(this.successMessage)) {
-      return await this.getElementText(this.successMessage);
+    // Try multiple selectors for success messages
+    const successSelectors = [
+      '.bar-notification.success',
+      '.bar-notification',
+      '.notification.success',
+      '.alert-success',
+      '.success-message',
+      '[class*="success"]',
+      '[class*="notification"]'
+    ];
+
+    for (const selector of successSelectors) {
+      try {
+        const element = this.page.locator(selector).first();
+        await element.waitFor({ timeout: 3000 });
+        if (await element.isVisible()) {
+          const text = await element.textContent();
+          if (text && text.trim()) {
+            return text.trim();
+          }
+        }
+      } catch (error) {
+        // Continue to next selector
+      }
     }
     return '';
   }

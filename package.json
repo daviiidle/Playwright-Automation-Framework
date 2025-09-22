@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:save": "playwright test > test-output.log 2>&1",
+    "test:watch": "playwright test",
+    "test:clean": "chcp 65001 && playwright test 2>&1 | tee test-output.log",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",

@@ -4,6 +4,10 @@ import { UserDataFactory, ProductDataFactory } from '../data';
 import { TestHelpers } from '../utils/TestHelpers';
 import { UserManager } from '../utils/UserManager';
 import { TestIsolation } from '../utils/TestIsolation';
+import { TestHooks } from '../utils/TestHooks';
+
+// Setup global hooks for assertion failure capture
+TestHooks.setupGlobalHooks();
 
 type TestFixtures = {
   homePage: HomePage;

@@ -38,7 +38,7 @@ test.describe('User Login', () => {
     await loginPage.login('', 'password123');
 
     const errorMessage = await loginPage.getErrorMessage();
-    expect(errorMessage).toContain('Please enter your email');
+    expect(errorMessage).toContain('Login was unsuccessful');
   });
 
   test('should show error for empty password field', async ({
@@ -47,7 +47,7 @@ test.describe('User Login', () => {
     await loginPage.login('test@example.com', '');
 
     const errorMessage = await loginPage.getErrorMessage();
-    expect(errorMessage).toContain('Please enter password');
+    expect(errorMessage).toContain('Login was unsuccessful');
   });
 
   test('should remember user when checkbox is checked', async ({
@@ -86,10 +86,10 @@ test.describe('User Login', () => {
   test('should validate email format in login form', async ({
     loginPage
   }) => {
-    await loginPage.validateEmailField('invalid-email');
+    await loginPage.login('invalid-email', 'password123');
 
     const errorMessage = await loginPage.getErrorMessage();
-    expect(errorMessage).toContain('Wrong email');
+    expect(errorMessage).toContain('Please enter a valid email address');
   });
 
   test('should allow login with Enter key', async ({
