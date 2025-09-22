@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: "Test ${{ matrix.project }} (Shard ${{ matrix.shard }})"
     timeout-minutes: 60
     runs-on: ubuntu-latest
     strategy:
@@ -40,22 +41,15 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-results-${{ matrix.project }}-${{ matrix.shard }}
+        name: test-results-${{ matrix.project }}-shard-${{ replace(matrix.shard, '/', '-') }}
         path: |
           test-results/
           playwright-report/
         retention-days: 30
 
-    - name: Upload test report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: playwright-report-${{ matrix.project }}-${{ matrix.shard }}
-        path: playwright-report/
-        retention-days: 30
-
   # Merge all test results and generate combined report
   merge-reports:
+    name: "Merge Test Reports"
     if: always()
     needs: [test]
     runs-on: ubuntu-latest
@@ -85,13 +79,13 @@ jobs:
         find all-artifacts -name "*.xml" -path "*/test-results/*" -exec cp {} merged-results/ \;
 
         # Generate merged HTML report
-        npx playwright merge-reports --reporter html all-artifacts/playwright-results-*/
+        npx playwright merge-reports --reporter html all-artifacts/test-results-*/
 
     - name: Upload merged report
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: merged-playwright-report
+        name: final-test-report
         path: |
           playwright-report/
           merged-results/
