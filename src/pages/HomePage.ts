@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { TestConfig } from '../config/TestConfig';
 
 export class HomePage extends BasePage {
   // Header elements
@@ -516,7 +517,7 @@ export class HomePage extends BasePage {
     }
 
     // More lenient check - if we're still on the website, consider it successful
-    if (currentUrl.includes('demowebshop.tricentis.com')) {
+    if (currentUrl.includes(new URL(TestConfig.baseUrl).hostname)) {
       return;
     }
 

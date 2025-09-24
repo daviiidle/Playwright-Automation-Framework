@@ -189,7 +189,45 @@ export class ProductPage extends BasePage {
   }
 
   async isProductImageVisible(): Promise<boolean> {
-    return await this.isElementVisible(this.productImage);
+    try {
+      await this.productImage.waitFor({ state: 'visible', timeout: 10000 });
+
+      // Additional check to ensure the image is actually loaded (not broken)
+      const isVisible = await this.productImage.isVisible();
+      if (!isVisible) return false;
+
+      // Check if image has loaded by evaluating its naturalWidth/naturalHeight
+      const imageLoaded = await this.productImage.evaluate((img: HTMLImageElement) => {
+        return img.complete && img.naturalHeight !== 0 && img.naturalWidth !== 0;
+      });
+
+      return imageLoaded;
+    } catch (error) {
+      // Try alternative selectors if the primary one fails
+      const alternativeSelectors = [
+        '.product-main-picture img',
+        '.product-essential .product-image img',
+        '.product-img-box img',
+        'img[alt*="Picture"]'
+      ];
+
+      for (const selector of alternativeSelectors) {
+        try {
+          const altImage = this.page.locator(selector).first();
+          await altImage.waitFor({ state: 'visible', timeout: 3000 });
+
+          const imageLoaded = await altImage.evaluate((img: HTMLImageElement) => {
+            return img.complete && img.naturalHeight !== 0 && img.naturalWidth !== 0;
+          });
+
+          if (imageLoaded) return true;
+        } catch {
+          // Continue to next selector
+        }
+      }
+
+      return false;
+    }
   }
 
   async clickProductImage(): Promise<void> {

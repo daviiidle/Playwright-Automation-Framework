@@ -1,4 +1,5 @@
 import { test, expect } from '../../../src/fixtures/BaseFixture';
+import { TestConfig } from '../../../src/config/TestConfig';
 
 test.describe('Website Navigation', () => {
   test.beforeEach(async ({ homePage }) => {
@@ -121,7 +122,7 @@ test.describe('Website Navigation', () => {
       }
 
       const currentUrl = await page.url();
-      expect(currentUrl).toContain('demowebshop.tricentis.com');
+      expect(currentUrl).toContain(new URL(TestConfig.baseUrl).hostname);
     } else {
       // If no products found, just verify we're on computers page
       const currentUrl = await page.url();
@@ -185,7 +186,7 @@ test.describe('Website Navigation', () => {
     await logo.click();
 
     const currentUrl = await page.url();
-    expect(currentUrl).toBe(process.env.BASE_URL + '/');
+    expect(currentUrl).toBe(TestConfig.baseUrl + '/');
   });
 
   test('should navigate via menu hover', async ({
@@ -230,7 +231,7 @@ test.describe('Website Navigation', () => {
     ];
 
     for (const link of deepLinks) {
-      await page.goto(process.env.BASE_URL + link);
+      await page.goto(TestConfig.baseUrl + link);
 
       const currentUrl = await page.url();
       expect(currentUrl).toContain(link);
@@ -250,7 +251,7 @@ test.describe('Website Navigation', () => {
     ];
 
     for (const url of invalidUrls) {
-      await page.goto(process.env.BASE_URL + url, { waitUntil: 'networkidle' });
+      await page.goto(TestConfig.baseUrl + url, { waitUntil: 'networkidle' });
 
       const pageTitle = await page.title();
       expect(pageTitle).toBeTruthy();

@@ -1,4 +1,5 @@
 import { test, expect } from '../../../src/fixtures/BaseFixture';
+import { TestConfig } from '../../../src/config/TestConfig';
 
 test.describe('Search Functionality', () => {
   test.beforeEach(async ({ homePage }) => {
@@ -79,7 +80,7 @@ test.describe('Search Functionality', () => {
     const currentUrl = await page.url();
 
     // Empty search may stay on homepage or redirect to search - both are valid
-    const isValidPage = currentUrl.includes('/search') || currentUrl.includes('demowebshop.tricentis.com');
+    const isValidPage = currentUrl.includes('/search') || currentUrl.includes(new URL(TestConfig.baseUrl).hostname);
     expect(isValidPage).toBe(true);
 
     // Check that page loaded successfully (either search results or homepage products)

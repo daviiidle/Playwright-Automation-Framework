@@ -13,7 +13,12 @@ export default defineConfig({
   expect: {
     timeout: 15000,
   },
-  reporter: [
+  reporter: process.env.CI ? [
+    ['blob'],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/results.xml' }],
+    ['./src/reporters/ErrorOnlyReporter.ts', { outputDir: 'test-results/error-logs' }]
+  ] : [
     ['html', { open: 'never' }],
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/results.xml' }],

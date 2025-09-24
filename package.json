@@ -24,7 +24,7 @@
     "errors:handler": "npx ts-node src/utils/ErrorAnalyzer.ts handler",
     "retries:off": "node toggle-retries.js off",
     "retries:on": "node toggle-retries.js on",
-    "codegen": "playwright codegen https://demowebshop.tricentis.com/",
+    "codegen": "playwright codegen ${BASE_URL:-https://demowebshop.tricentis.com/}",
     "install:browsers": "playwright install"
   },
   "keywords": ["playwright", "automation", "testing", "typescript", "e2e"],

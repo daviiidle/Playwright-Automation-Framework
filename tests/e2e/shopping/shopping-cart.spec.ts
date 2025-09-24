@@ -1,4 +1,5 @@
 import { test, expect } from '../../../src/fixtures/BaseFixture';
+import { TestConfig } from '../../../src/config/TestConfig';
 
 test.describe('Shopping Cart', () => {
   test.beforeEach(async ({ homePage }) => {
@@ -174,13 +175,13 @@ test.describe('Shopping Cart', () => {
     if (isContinueAvailable) {
       await shoppingCartPage.continueShopping();
       const currentUrl = await shoppingCartPage.page.url();
-      expect(currentUrl).toBe(process.env.BASE_URL + '/');
+      expect(currentUrl).toBe(TestConfig.baseUrl + '/');
     } else {
       // Test passes if continue shopping button is not available on empty cart (expected)
       // Navigate back to home manually to test basic navigation
-      await shoppingCartPage.page.goto(process.env.BASE_URL + '/');
+      await shoppingCartPage.page.goto(TestConfig.baseUrl + '/');
       const currentUrl = await shoppingCartPage.page.url();
-      expect(currentUrl).toBe(process.env.BASE_URL + '/');
+      expect(currentUrl).toBe(TestConfig.baseUrl + '/');
     }
   });
 

@@ -45,6 +45,18 @@ jobs:
       run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}
       env:
         CI: true
+        BASE_URL: ${{ vars.BASE_URL }}
+        API_URL: ${{ vars.API_URL }}
+        HEADLESS: ${{ vars.HEADLESS }}
+        SLOW_MO: ${{ vars.SLOW_MO }}
+        WORKERS: ${{ vars.WORKERS }}
+        RETRIES: ${{ vars.RETRIES }}
+        TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+        TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+        TEST_FIRST_NAME: ${{ vars.TEST_FIRST_NAME }}
+        TEST_LAST_NAME: ${{ vars.TEST_LAST_NAME }}
+        ENABLE_FAKER_SEED: ${{ vars.ENABLE_FAKER_SEED }}
+        FAKER_SEED: ${{ vars.FAKER_SEED }}
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -53,7 +65,7 @@ jobs:
         name: test-results-${{ matrix.project }}-shard-${{ matrix.shard_name }}
         path: |
           test-results/
-          playwright-report/
+          blob-report/
         retention-days: 30
 
   # Merge all test results and generate combined report
@@ -82,13 +94,21 @@ jobs:
       run: |
         # Create merged results directory
         mkdir -p merged-results
+        mkdir -p blob-reports
 
         # Copy all test results to merged directory
         find all-artifacts -name "*.json" -path "*/test-results/*" -exec cp {} merged-results/ \;
         find all-artifacts -name "*.xml" -path "*/test-results/*" -exec cp {} merged-results/ \;
 
-        # Generate merged HTML report
-        npx playwright merge-reports --reporter html all-artifacts/test-results-*/
+        # Copy all blob reports to a single directory for merging
+        find all-artifacts -path "*/blob-report/*" -type f -exec cp {} blob-reports/ \;
+
+        # Generate merged HTML report from blob reports
+        if [ "$(ls -A blob-reports)" ]; then
+          npx playwright merge-reports --reporter html blob-reports
+        else
+          echo "No blob reports found, skipping merge"
+        fi
 
     - name: Upload merged report
       uses: actions/upload-artifact@v4

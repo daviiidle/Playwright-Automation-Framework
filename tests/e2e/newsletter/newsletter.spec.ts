@@ -1,4 +1,5 @@
 import { test, expect } from '../../../src/fixtures/BaseFixture';
+import { TestConfig } from '../../../src/config/TestConfig';
 
 test.describe('Newsletter Subscription', () => {
   test.beforeEach(async ({ homePage }) => {
@@ -19,7 +20,7 @@ test.describe('Newsletter Subscription', () => {
 
     // Check if subscription was processed - either the form is hidden, result is shown, or we stay on same page
     const currentUrl = await homePage.getCurrentUrl();
-    const isOnSamePage = currentUrl.includes('demowebshop.tricentis.com');
+    const isOnSamePage = currentUrl.includes(new URL(TestConfig.baseUrl).hostname);
 
     // Check if newsletter subscription block is hidden (indicates success)
     const subscriptionBlockHidden = await homePage.page.locator('.newsletter-subscribe-block').isHidden().catch(() => false);
@@ -76,7 +77,7 @@ test.describe('Newsletter Subscription', () => {
 
     // Either there should be a notification, or the form should handle it gracefully
     const currentUrl = await homePage.getCurrentUrl();
-    expect(hasNotification || currentUrl.includes('demowebshop')).toBe(true);
+    expect(hasNotification || currentUrl.includes(new URL(TestConfig.baseUrl).hostname)).toBe(true);
   });
 
   test('should handle empty email submission', async ({
@@ -111,7 +112,7 @@ test.describe('Newsletter Subscription', () => {
 
     // Either there should be a notification, or the form should handle it gracefully
     const currentUrl = await homePage.getCurrentUrl();
-    expect(hasNotification || currentUrl.includes('demowebshop')).toBe(true);
+    expect(hasNotification || currentUrl.includes(new URL(TestConfig.baseUrl).hostname)).toBe(true);
   });
 
   test('should handle duplicate subscription', async ({
